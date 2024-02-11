@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.ComponentModel;
+using System.Windows;
+using System.Diagnostics;
 
 
 namespace ColorMixer
@@ -41,81 +43,108 @@ namespace ColorMixer
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-    public class   MainViewModel : ViewModelBase
-    {
-        private ColorRGBA _color;
-        private bool _alphaCheckState;
-        private double _alphaValue;
 
-        public ColorRGBA Color
+    public class MainViewModel : ViewModelBase
+    {
+        private ColorModel _color;
+        private ObservableCollection<ColorModel> _colorList;
+        private Color _currentColor;
+
+        public MainViewModel()
+        {
+            Color = new ColorModel() { Red = 0, Green = 0, Blue = 0, Alpha = 0 };
+
+            SliderValueChangedCommand = new RelayCommand(ExecuteSliderValueChanged);
+            AddColorCommand = new RelayCommand(ExecuteAddColor);
+            DeleteColorCommand = new RelayCommand(ExecuteDeleteColor);
+
+            ColorList = new ObservableCollection<ColorModel>();
+            CurrentColor = Color.Color;
+        }
+        
+
+        public Color CurrentColor
+        {
+
+            get => _currentColor;
+            set
+            {
+                _currentColor = value;
+                OnPropertyChanged(nameof(CurrentColor));
+                OnPropertyChanged(nameof(ColorBackground));
+            }
+        }
+        public Brush ColorBackground => new SolidColorBrush(_currentColor);
+        public ColorModel Color
         {
             get => _color;
             set
             {
                 _color = value;
                 OnPropertyChanged(nameof(Color));
+                OnPropertyChanged(nameof(ColorBackground));
+                CurrentColor = _color.Color;
             }
         }
-
-        public bool AlphaCheckState
+      
+        public ObservableCollection<ColorModel> ColorList
         {
-            get => _alphaCheckState;
+            get => _colorList;
             set
             {
-                _alphaCheckState = value;
-                OnPropertyChanged(nameof(AlphaCheckState));
+                _colorList = value;
+                OnPropertyChanged(nameof(ColorList));
+
             }
         }
 
-        public double AlphaValue
+        private byte _alphaValue;
+
+        public byte AlphaValue
         {
             get => _alphaValue;
             set
             {
                 _alphaValue = value;
                 OnPropertyChanged(nameof(AlphaValue));
+                Color.Alpha = (byte)value;
             }
         }
 
+     
+
+
+        public string ColorToHex => Color.ColorToHex;
+
+        public ICommand SliderValueChangedCommand { get; }
         public ICommand AddColorCommand { get; }
         public ICommand DeleteColorCommand { get; }
 
-        public ObservableCollection<Color> ColorList { get; }
-
-        public MainViewModel()
+        private void ExecuteSliderValueChanged(object parameter)
         {
-            Color = new ColorRGBA() { Red = 0, Green = 0, Blue = 0, Alpha = 255 };
-            AlphaCheckState = false;
-            AlphaValue = 0;
-            AddColorCommand = new RelayCommand(ExecuteAddColor);
-            DeleteColorCommand = new RelayCommand(ExecuteDeleteColor);
-            ColorList = new ObservableCollection<Color>();
-        }
-        private Color _selectedColor;
-
-        public Color SelectedColor
-        {
-            get => _selectedColor;
-            set
+           
+            Color = new ColorModel
             {
-                _selectedColor = value;
-                OnPropertyChanged(nameof(SelectedColor));
-            }
+                Red = Color.Red,
+                Green = Color.Green,
+                Blue = Color.Blue,
+                Alpha = Color.Alpha
+            };
+           
+            OnPropertyChanged(nameof(ColorToHex));
         }
+
         private void ExecuteAddColor(object parameter)
         {
-            // Логика добавления цвета в ColorList
-            ColorList.Add(Color.Color);
+            ColorList.Add(Color);
         }
 
         private void ExecuteDeleteColor(object parameter)
         {
-            // Логика удаления цвета из ColorList
-            if (parameter is Color colorToDelete)
+            if (parameter is ColorModel colorToDelete)
             {
                 ColorList.Remove(colorToDelete);
             }
         }
     }
 }
-

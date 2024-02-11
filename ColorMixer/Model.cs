@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -9,65 +10,42 @@ using System.Windows.Media;
 
 namespace ColorMixer
 {
-    public class ColorRGBA : INotifyPropertyChanged
+
+    public class ColorModel
     {
+        private byte _alpha;
         private byte _red;
         private byte _green;
         private byte _blue;
-        private byte _alpha;
+
+        public byte Alpha
+        {
+            get => _alpha;
+            set => _alpha = value;
+        }
 
         public byte Red
         {
             get => _red;
-            set
-            {
-                _red = value;
-                OnPropertyChanged(nameof(Red));
-                OnPropertyChanged(nameof(Color));
-            }
+            set => _red = value;
         }
 
         public byte Green
         {
             get => _green;
-            set
-            {
-                _green = value;
-                OnPropertyChanged(nameof(Green));
-                OnPropertyChanged(nameof(Color));
-            }
+            set => _green = value;
         }
 
         public byte Blue
         {
             get => _blue;
-            set
-            {
-                _blue = value;
-                OnPropertyChanged(nameof(Blue));
-                OnPropertyChanged(nameof(Color));
-            }
-        }
-
-        public byte Alpha
-        {
-            get => _alpha;
-            set
-            {
-                _alpha = value;
-                OnPropertyChanged(nameof(Alpha));
-                OnPropertyChanged(nameof(Color));
-            }
+            set => _blue = value;
         }
 
         public Color Color => Color.FromArgb(Alpha, Red, Green, Blue);
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public string ColorToHex => Color.ToString();
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+      
     }
 }
-
